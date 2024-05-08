@@ -34,7 +34,7 @@ class bank {
 }
 let myBank = new bank();
 //customer create
-const cus = new customer("Aiman", "Tahir", 22, "female", 923423447, 10010);
+const cus = new customer("Aiman", "Tahir", 22, "female", 923423447, 1000);
 myBank.addCustomer(cus);
 myBank.addAccountNumber({ accNumber: cus.accNumber, balance: 10000 });
 // console.log(myBank)
@@ -45,7 +45,7 @@ async function bankService(bank) {
             type: "list",
             name: "select",
             message: "plz select your choice",
-            choices: ["view balance", "cash withdraw", "cash deposit", "Exit"],
+            choices: ["view balance", "cash withdraw", "cash deposit", "Add new customer", "Exit"],
         });
         // view balance
         if (service.select == "view balance") {
@@ -62,8 +62,55 @@ async function bankService(bank) {
                 let name = myBank.customer.find((item) => item.accNumber == account.accNumber);
                 console.log(`dear ${chalk.green.italic(name?.firstName)} your account balance is ${chalk.bold.blueBright(`RS ${account.balance}`)} `);
             }
-            //cash witdraw
         }
+        // Function to add a new customer
+        async function addNewCustomer(bank) {
+            let newCustomerInfo = await inquirer.prompt([
+                {
+                    type: "input",
+                    name: "firstName",
+                    message: "Enter first name:",
+                },
+                {
+                    type: "input",
+                    name: "lastName",
+                    message: "Enter last name:",
+                },
+                {
+                    type: "input",
+                    name: "age",
+                    message: "Enter age:",
+                },
+                {
+                    type: "input",
+                    name: "gender",
+                    message: "Enter gender:",
+                },
+                {
+                    type: "input",
+                    name: "mobNumber",
+                    message: "Enter mobile number:",
+                },
+                {
+                    type: "number",
+                    name: "initialBalance",
+                    message: "Enter initial account balance:",
+                },
+            ]);
+            const startingAccountNumber = 1000;
+            const newAccountNumber = startingAccountNumber + bank.customer.length;
+            const newCustomer = new customer(newCustomerInfo.firstName, newCustomerInfo.lastName, newCustomerInfo.age, newCustomerInfo.gender, newCustomerInfo.mobNumber, newAccountNumber
+            // myBank.account.length + 1 // Generate unique account number
+            );
+            myBank.addCustomer(newCustomer);
+            myBank.addAccountNumber({
+                accNumber: newAccountNumber,
+                balance: newCustomerInfo.initialBalance,
+            });
+            console.log(chalk.green.bold("New customer added successfully!"));
+            console.log("Your account number is: " + chalk.bold.blue(newAccountNumber));
+        }
+        //cash witdraw
         if (service.select == "cash withdraw") {
             let res = await inquirer.prompt({
                 type: "input",
@@ -108,6 +155,10 @@ async function bankService(bank) {
                 bank.transaction({ accNumber: account.accNumber, balance: newBalance });
                 console.log(newBalance);
             }
+        }
+        // add new customer
+        if (service.select == "Add new customer") {
+            await addNewCustomer(bank);
         }
         if (service.select == "Exit") {
             return;
